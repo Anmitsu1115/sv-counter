@@ -346,6 +346,20 @@
             background-color: #666666;
             transform: translateY(-1px);
         }
+
+        /* カウンターがない場合の画面 */
+        #noCounterScreen {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+        #noCounterScreen p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
     </style>
 </head>
 <body>
@@ -359,6 +373,11 @@
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
                 Googleでログイン
             </button>
+        </div>
+
+        <div id="noCounterScreen">
+            <p>カウンターがありません。<br>新規作成してください。</p>
+            <button id="newCounterButton" onclick="createNewCounter()">新規作成</button>
         </div>
 
         <div id="counterListScreen">
@@ -519,15 +538,25 @@
             if (currentUser) {
                 user = currentUser;
                 document.getElementById('loginUI').style.display = 'none';
-                document.getElementById('counterListScreen').style.display = 'block';
                 document.getElementById('userInfo').textContent = `ログイン中: ${user.displayName}`;
 
                 // データベースからの全カウンターのデータ読み込み
                 const userRef = database.ref('users/' + user.uid + '/counters');
                 userRef.on('value', (snapshot) => {
                     counters = snapshot.val() || {};
-                    renderCounterList();
-                    // もし現在カウンター詳細画面にいる場合、データ更新を反映
+                    if (Object.keys(counters).length === 0) {
+                        // カウンターが一つもない場合
+                        document.getElementById('noCounterScreen').style.display = 'block';
+                        document.getElementById('counterListScreen').style.display = 'none';
+                        document.getElementById('counterDetailScreen').style.display = 'none';
+                    } else {
+                        // カウンターが一つ以上ある場合
+                        document.getElementById('noCounterScreen').style.display = 'none';
+                        document.getElementById('counterListScreen').style.display = 'block';
+                        document.getElementById('counterDetailScreen').style.display = 'none';
+                        renderCounterList();
+                    }
+                    
                     if (currentCounterId && counters[currentCounterId]) {
                         currentCountersData = counters[currentCounterId].data;
                         renderCounters();
@@ -536,6 +565,7 @@
             } else {
                 user = null;
                 document.getElementById('loginUI').style.display = 'block';
+                document.getElementById('noCounterScreen').style.display = 'none';
                 document.getElementById('counterListScreen').style.display = 'none';
                 document.getElementById('counterDetailScreen').style.display = 'none';
                 counters = {};
@@ -575,7 +605,11 @@
                         nemesis: { win: 0, lose: 0 }
                     }
                 };
-                newCounterRef.set(newCounterData);
+                newCounterRef.set(newCounterData)
+                    .then(() => {
+                        // 新規作成後、作成したカウンターの詳細画面に移動
+                        selectCounter(newCounterRef.key);
+                    });
             }
         }
 
@@ -594,6 +628,7 @@
             currentCountersData = counters[id].data;
             
             document.getElementById('currentDeckName').textContent = counters[id].name;
+            document.getElementById('noCounterScreen').style.display = 'none';
             document.getElementById('counterListScreen').style.display = 'none';
             document.getElementById('counterDetailScreen').style.display = 'block';
             
@@ -604,7 +639,11 @@
         function backToCounterList() {
             currentCounterId = null;
             document.getElementById('counterDetailScreen').style.display = 'none';
-            document.getElementById('counterListScreen').style.display = 'block';
+            if (Object.keys(counters).length === 0) {
+                document.getElementById('noCounterScreen').style.display = 'block';
+            } else {
+                document.getElementById('counterListScreen').style.display = 'block';
+            }
         }
 
         // カウンターと勝率を画面に表示する関数
