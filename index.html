@@ -255,30 +255,25 @@
             }
         }
 
+        .class-item {
+            background-color: #2c2c2c;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease-in-out;
+        }
+
         .class-item:hover {
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-        }
-        
-        .class-title-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 10px 0 5px;
-        }
-
-        .class-icon {
-            width: 24px;
-            height: 24px;
-            margin-right: 8px;
-            border-radius: 50%;
-            border: 2px solid #555;
         }
 
         .class-title {
             font-size: 1rem;
             font-weight: 600;
             color: #ffffff;
+            margin-bottom: 10px;
         }
 
         .count-buttons {
@@ -334,7 +329,7 @@
         .counter-display {
             font-size: 1rem;
             font-weight: bold;
-            margin-top: 5px;
+            margin-top: 10px;
             color: #ffffff;
         }
 
@@ -458,10 +453,7 @@
             
             <div class="class-grid">
                 <div class="class-item" id="class-elf">
-                    <div class="class-title-container">
-                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-elf.svg" alt="エルフ" class="class-icon">
-                        <span class="class-title">エルフ</span>
-                    </div>
+                    <span class="class-title">エルフ</span>
                     <div class="count-buttons">
                         <button class="count-button win-button" onclick="updateCounter('elf', 'win', 1)">勝ち +</button>
                         <button class="count-button lose-button" onclick="updateCounter('elf', 'lose', 1)">負け +</button>
@@ -475,10 +467,7 @@
                 </div>
                 
                 <div class="class-item" id="class-royal">
-                    <div class="class-title-container">
-                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-royal.svg" alt="ロイヤル" class="class-icon">
-                        <span class="class-title">ロイヤル</span>
-                    </div>
+                    <span class="class-title">ロイヤル</span>
                     <div class="count-buttons">
                         <button class="count-button win-button" onclick="updateCounter('royal', 'win', 1)">勝ち +</button>
                         <button class="count-button lose-button" onclick="updateCounter('royal', 'lose', 1)">負け +</button>
@@ -492,10 +481,7 @@
                 </div>
                 
                 <div class="class-item" id="class-witch">
-                    <div class="class-title-container">
-                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-witch.svg" alt="ウィッチ" class="class-icon">
-                        <span class="class-title">ウィッチ</span>
-                    </div>
+                    <span class="class-title">ウィッチ</span>
                     <div class="count-buttons">
                         <button class="count-button win-button" onclick="updateCounter('witch', 'win', 1)">勝ち +</button>
                         <button class="count-button lose-button" onclick="updateCounter('witch', 'lose', 1)">負け +</button>
@@ -509,10 +495,7 @@
                 </div>
                 
                 <div class="class-item" id="class-dragon">
-                    <div class="class-title-container">
-                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-dragon.svg" alt="ドラゴン" class="class-icon">
-                        <span class="class-title">ドラゴン</span>
-                    </div>
+                    <span class="class-title">ドラゴン</span>
                     <div class="count-buttons">
                         <button class="count-button win-button" onclick="updateCounter('dragon', 'win', 1)">勝ち +</button>
                         <button class="count-button lose-button" onclick="updateCounter('dragon', 'lose', 1)">負け +</button>
@@ -526,10 +509,7 @@
                 </div>
                 
                 <div class="class-item" id="class-nightmare">
-                    <div class="class-title-container">
-                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-nightmare.svg" alt="ナイトメア" class="class-icon">
-                        <span class="class-title">ナイトメア</span>
-                    </div>
+                    <span class="class-title">ナイトメア</span>
                     <div class="count-buttons">
                         <button class="count-button win-button" onclick="updateCounter('nightmare', 'win', 1)">勝ち +</button>
                         <button class="count-button lose-button" onclick="updateCounter('nightmare', 'lose', 1)">負け +</button>
@@ -543,10 +523,7 @@
                 </div>
                 
                 <div class="class-item" id="class-bishop">
-                    <div class="class-title-container">
-                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-bishop.svg" alt="ビショップ" class="class-icon">
-                        <span class="class-title">ビショップ</span>
-                    </div>
+                    <span class="class-title">ビショップ</span>
                     <div class="count-buttons">
                         <button class="count-button win-button" onclick="updateCounter('bishop', 'win', 1)">勝ち +</button>
                         <button class="count-button lose-button" onclick="updateCounter('bishop', 'lose', 1)">負け +</button>
@@ -560,10 +537,7 @@
                 </div>
                 
                 <div class="class-item" id="class-nemesis">
-                    <div class="class-title-container">
-                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-nemesis.svg" alt="ネメシス" class="class-icon">
-                        <span class="class-title">ネメシス</span>
-                    </div>
+                    <span class="class-title">ネメシス</span>
                     <div class="count-buttons">
                         <button class="count-button win-button" onclick="updateCounter('nemesis', 'win', 1)">勝ち +</button>
                         <button class="count-button lose-button" onclick="updateCounter('nemesis', 'lose', 1)">負け +</button>
@@ -653,22 +627,24 @@
                 const userRef = database.ref('users/' + user.uid + '/counters');
                 userRef.on('value', (snapshot) => {
                     counters = snapshot.val() || {};
-                    if (Object.keys(counters).length === 0) {
+                    
+                    if (currentCounterId && counters[currentCounterId]) {
+                        // 詳細画面が表示中の場合は、データだけ更新して再描画
+                        currentCountersData = counters[currentCounterId].data;
+                        renderCounters();
+                    } else if (Object.keys(counters).length === 0) {
                         // カウンターが一つもない場合
+                        currentCounterId = null;
                         document.getElementById('noCounterScreen').style.display = 'block';
                         document.getElementById('counterListScreen').style.display = 'none';
                         document.getElementById('counterDetailScreen').style.display = 'none';
                     } else {
                         // カウンターが一つ以上ある場合
+                        currentCounterId = null;
                         document.getElementById('noCounterScreen').style.display = 'none';
                         document.getElementById('counterListScreen').style.display = 'block';
                         document.getElementById('counterDetailScreen').style.display = 'none';
                         renderCounterList();
-                    }
-                    
-                    if (currentCounterId && counters[currentCounterId]) {
-                        currentCountersData = counters[currentCounterId].data;
-                        renderCounters();
                     }
                 });
             } else {
