@@ -161,20 +161,43 @@
             background-color: #444;
         }
         
-        .counter-list-item span {
+        .counter-list-item-left {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        
+        .counter-list-item-left span {
             font-size: 1.2rem;
             font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .counter-list-item-actions {
+            display: flex;
+            gap: 10px;
         }
 
-        .delete-button {
-            background-color: #f44336;
-            color: #ffffff;
+        .edit-button, .delete-button {
             border: none;
             padding: 5px 10px;
             border-radius: 5px;
             font-size: 0.8rem;
             cursor: pointer;
             transition: background-color 0.2s;
+        }
+        
+        .edit-button {
+            background-color: #2196F3;
+            color: #ffffff;
+        }
+        .edit-button:hover {
+            background-color: #1976D2;
+        }
+
+        .delete-button {
+            background-color: #f44336;
+            color: #ffffff;
         }
 
         .delete-button:hover {
@@ -216,7 +239,7 @@
             gap: 15px;
             width: 100%;
             max-width: 1100px;
-            margin: 0 auto; /* この行を追加します */
+            margin: 0 auto;
         }
         
         @media (max-width: 1100px) {
@@ -571,8 +594,31 @@
                 const counter = counters[id];
                 const listItem = document.createElement('div');
                 listItem.className = 'counter-list-item';
-                listItem.innerHTML = `<span>${counter.name}</span><button class="delete-button" onclick="deleteCounter('${id}', event)">削除</button>`;
-                listItem.onclick = () => selectCounter(id);
+                
+                const leftDiv = document.createElement('div');
+                leftDiv.className = 'counter-list-item-left';
+                leftDiv.innerHTML = `<span>${counter.name}</span>`;
+                leftDiv.onclick = () => selectCounter(id);
+                
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'counter-list-item-actions';
+                
+                const editButton = document.createElement('button');
+                editButton.className = 'edit-button';
+                editButton.textContent = '編集';
+                editButton.onclick = (event) => editCounterName(id, event);
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'delete-button';
+                deleteButton.textContent = '削除';
+                deleteButton.onclick = (event) => deleteCounter(id, event);
+
+                actionsDiv.appendChild(editButton);
+                actionsDiv.appendChild(deleteButton);
+                
+                listItem.appendChild(leftDiv);
+                listItem.appendChild(actionsDiv);
+                
                 listElement.appendChild(listItem);
             }
         }
@@ -601,6 +647,19 @@
                     });
             }
         }
+        
+        // カウンター名を編集する関数
+        function editCounterName(id, event) {
+            event.stopPropagation(); // 親要素のクリックイベントが発火しないようにする
+            const currentName = counters[id].name;
+            const newName = prompt(`「${currentName}」の新しい名前を入力してください。`, currentName);
+            
+            if (newName && newName.trim() !== '' && newName !== currentName) {
+                const counterRef = database.ref('users/' + user.uid + '/counters/' + id);
+                counterRef.update({ name: newName });
+            }
+        }
+
 
         // カウンターを削除する関数
         function deleteCounter(id, event) {
