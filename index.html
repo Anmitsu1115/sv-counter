@@ -14,16 +14,16 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 10px; /* パディングを小さくしてスペースを確保 */
+            padding: 10px;
             box-sizing: border-box;
         }
 
         .container {
             width: 100%;
-            max-width: 1200px; /* 最大幅を少し広げて7列に対応 */
+            max-width: 1200px;
             background-color: #1e1e1e;
             border-radius: 15px;
-            padding: 20px; /* パディングを小さくしてスペースを確保 */
+            padding: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
@@ -32,11 +32,11 @@
 
         .header {
             text-align: center;
-            margin-bottom: 20px; /* マージンを小さく */
+            margin-bottom: 20px;
         }
 
         .header h1 {
-            font-size: 2rem; /* フォントサイズを小さく */
+            font-size: 2rem;
             font-weight: 700;
             margin: 0;
             color: #ffffff;
@@ -45,8 +45,8 @@
 
         .class-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr); /* 7列で固定 */
-            gap: 15px; /* ギャップを小さく */
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
             width: 100%;
             max-width: 1100px;
         }
@@ -55,32 +55,44 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px; /* パディングを小さく */
+            padding: 10px;
             background-color: #2c2c2c;
             border-radius: 12px;
             text-align: center;
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            min-width: 100px; /* 最小幅を設定して崩れを防ぐ */
+            min-width: 100px;
+        }
+        
+        @media (max-width: 1100px) {
+            .class-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .class-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         .class-item:hover {
-            transform: translateY(-5px); /* ホバー時の動きを控えめに */
+            transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
         }
 
         .class-title {
-            font-size: 1rem; /* フォントサイズを小さく */
+            font-size: 1rem;
             font-weight: 600;
-            margin: 10px 0 5px; /* マージンを小さく */
+            margin: 10px 0 5px;
             color: #ffffff;
         }
 
         .win-button, .lose-button {
             width: 100%;
-            padding: 8px; /* パディングを小さく */
+            padding: 8px;
             border-radius: 8px;
             border: none;
-            font-size: 0.9rem; /* フォントサイズを小さく */
+            font-size: 0.9rem;
             font-weight: bold;
             cursor: pointer;
             color: #ffffff;
@@ -107,7 +119,7 @@
         }
         
         .counter-display {
-            font-size: 1rem; /* フォントサイズを小さく */
+            font-size: 1rem;
             font-weight: bold;
             margin-top: 5px;
             color: #ffffff;
@@ -117,15 +129,15 @@
             width: 100%;
             max-width: 900px;
             text-align: center;
-            margin-top: 20px; /* マージンを小さく */
-            padding: 20px; /* パディングを小さく */
+            margin-top: 20px;
+            padding: 20px;
             background-color: #2c2c2c;
             border-radius: 12px;
         }
 
         .summary-container h2 {
-            font-size: 1.8rem; /* フォントサイズを小さく */
-            margin-bottom: 10px; /* マージンを小さく */
+            font-size: 1.8rem;
+            margin-bottom: 10px;
             color: #ffffff;
             border-bottom: 2px solid #444;
             padding-bottom: 5px;
@@ -133,7 +145,7 @@
         }
 
         .summary-container p {
-            font-size: 1.2rem; /* フォントサイズを小さく */
+            font-size: 1.2rem;
             font-weight: bold;
             margin: 5px 0;
         }
@@ -148,11 +160,11 @@
 
         .reset-button-container {
             text-align: center;
-            margin-top: 20px; /* マージンを小さく */
+            margin-top: 20px;
         }
 
         #resetButton {
-            padding: 10px 25px; /* パディングを小さく */
+            padding: 10px 25px;
             font-size: 1rem;
             background-color: #555555;
             color: #ffffff;
@@ -260,9 +272,58 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <script>
-        // ローカルストレージからデータを読み込む
-        let counters = JSON.parse(localStorage.getItem('matchCounters')) || {
+        // Firebase の設定情報
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb6v6YhSDX2SiZXCYGVoaTaFnypjvYWB0",
+            authDomain: "sv-counter.firebaseapp.com",
+            databaseURL: "https://sv-counter-default-rtdb.firebaseio.com",
+            projectId: "sv-counter",
+            storageBucket: "sv-counter.firebasestorage.app",
+            messagingSenderId: "1066536188479",
+            appId: "1:1066536188479:web:3b4f046e6d72afcb10168a",
+            measurementId: "G-FP4LMSGEFZ"
+        };
+        
+        // Firebase を初期化
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        let user;
+
+        // 匿名認証
+        auth.signInAnonymously().then(() => {
+            user = auth.currentUser;
+            // ログイン成功後、データベースからデータを読み込む
+            const userRef = database.ref('users/' + user.uid);
+            userRef.on('value', (snapshot) => {
+                let data = snapshot.val();
+                if (data) {
+                    counters = data;
+                } else {
+                    // データがなければ初期化
+                    counters = {
+                        elf: { win: 0, lose: 0 },
+                        royal: { win: 0, lose: 0 },
+                        witch: { win: 0, lose: 0 },
+                        dragon: { win: 0, lose: 0 },
+                        nightmare: { win: 0, lose: 0 },
+                        bishop: { win: 0, lose: 0 },
+                        nemesis: { win: 0, lose: 0 }
+                    };
+                }
+                renderCounters();
+            });
+        }).catch((error) => {
+            console.error("Firebase Auth Error:", error);
+            alert("ログインに失敗しました。ページを再読み込みしてください。");
+        });
+
+        let counters = {
             elf: { win: 0, lose: 0 },
             royal: { win: 0, lose: 0 },
             witch: { win: 0, lose: 0 },
@@ -277,25 +338,14 @@
             let totalWin = 0;
             let totalLose = 0;
             
-            // 新しいクラス構成にデータを統合
-            const newCounters = {
-                elf: counters.elf || { win: 0, lose: 0 },
-                royal: counters.royal || { win: 0, lose: 0 },
-                witch: counters.witch || { win: 0, lose: 0 },
-                dragon: counters.dragon || { win: 0, lose: 0 },
-                nightmare: (counters.nightmare) ? counters.nightmare : { win: (counters.necromancer ? counters.necromancer.win : 0) + (counters.vampire ? counters.vampire.win : 0), lose: (counters.necromancer ? counters.necromancer.lose : 0) + (counters.vampire ? counters.vampire.lose : 0) },
-                bishop: counters.bishop || { win: 0, lose: 0 },
-                nemesis: counters.nemesis || { win: 0, lose: 0 }
-            };
-
-            for (const className in newCounters) {
+            for (const className in counters) {
                 const winElement = document.getElementById(`${className}Win`);
                 const loseElement = document.getElementById(`${className}Lose`);
                 const winrateElement = document.getElementById(`${className}Winrate`);
                 
                 if (winElement && loseElement && winrateElement) {
-                    const wins = newCounters[className].win;
-                    const loses = newCounters[className].lose;
+                    const wins = counters[className].win;
+                    const loses = counters[className].lose;
                     const totalMatches = wins + loses;
                     const winrate = totalMatches > 0 ? (wins / totalMatches * 100).toFixed(1) : '--';
                     
@@ -314,16 +364,14 @@
             document.getElementById('totalWin').textContent = totalWin;
             document.getElementById('totalLose').textContent = totalLose;
             document.getElementById('totalWinrate').textContent = totalWinrate;
-            
-            counters = newCounters;
-            localStorage.setItem('matchCounters', JSON.stringify(counters));
         }
 
         // カウンターを更新する関数
         function updateCounter(className, type) {
             counters[className][type]++;
-            localStorage.setItem('matchCounters', JSON.stringify(counters));
-            renderCounters();
+            // データベースにデータを保存
+            const userRef = database.ref('users/' + user.uid);
+            userRef.set(counters);
         }
 
         // 全てをリセットする関数
@@ -338,13 +386,10 @@
                     bishop: { win: 0, lose: 0 },
                     nemesis: { win: 0, lose: 0 }
                 };
-                localStorage.setItem('matchCounters', JSON.stringify(counters));
-                renderCounters();
+                const userRef = database.ref('users/' + user.uid);
+                userRef.set(counters);
             }
         }
-
-        // ページ読み込み時にカウンターを初期表示
-        document.addEventListener('DOMContentLoaded', renderCounters);
     </script>
 </body>
 </html>
