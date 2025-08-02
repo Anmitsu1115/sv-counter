@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>シャドウバース ワールズビヨンド 勝ち負けカウンター</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -258,15 +259,35 @@
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
         }
+        
+        .class-title-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0 5px;
+        }
+
+        .class-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            border-radius: 50%;
+            border: 2px solid #555;
+        }
 
         .class-title {
             font-size: 1rem;
             font-weight: 600;
-            margin: 10px 0 5px;
             color: #ffffff;
         }
 
-        .win-button, .lose-button {
+        .count-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .count-button {
             width: 100%;
             padding: 8px;
             border-radius: 8px;
@@ -275,14 +296,12 @@
             font-weight: bold;
             cursor: pointer;
             color: #ffffff;
-            margin-top: 5px;
             transition: background-color 0.2s ease-in-out, transform 0.1s;
         }
 
         .win-button {
             background-color: #4CAF50;
         }
-
         .win-button:hover {
             background-color: #45a049;
             transform: translateY(-1px);
@@ -291,12 +310,27 @@
         .lose-button {
             background-color: #f44336;
         }
-
         .lose-button:hover {
             background-color: #e53935;
             transform: translateY(-1px);
         }
         
+        .win-minus-button {
+            background-color: #81C784;
+            color: #212121;
+        }
+        .win-minus-button:hover {
+            background-color: #66bb6a;
+        }
+        
+        .lose-minus-button {
+            background-color: #e57373;
+            color: #212121;
+        }
+        .lose-minus-button:hover {
+            background-color: #ef5350;
+        }
+
         .counter-display {
             font-size: 1rem;
             font-weight: bold;
@@ -327,6 +361,15 @@
             font-size: 1.2rem;
             font-weight: bold;
             margin: 5px 0;
+        }
+        
+        .chart-container {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #2c2c2c;
+            border-radius: 12px;
         }
 
         #totalWin {
@@ -415,9 +458,16 @@
             
             <div class="class-grid">
                 <div class="class-item" id="class-elf">
-                    <span class="class-title">エルフ</span>
-                    <button class="win-button" onclick="updateCounter('elf', 'win')">勝ち</button>
-                    <button class="lose-button" onclick="updateCounter('elf', 'lose')">負け</button>
+                    <div class="class-title-container">
+                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-elf.svg" alt="エルフ" class="class-icon">
+                        <span class="class-title">エルフ</span>
+                    </div>
+                    <div class="count-buttons">
+                        <button class="count-button win-button" onclick="updateCounter('elf', 'win', 1)">勝ち +</button>
+                        <button class="count-button lose-button" onclick="updateCounter('elf', 'lose', 1)">負け +</button>
+                        <button class="count-button win-minus-button" onclick="updateCounter('elf', 'win', -1)">勝ち -</button>
+                        <button class="count-button lose-minus-button" onclick="updateCounter('elf', 'lose', -1)">負け -</button>
+                    </div>
                     <div class="counter-display">
                         <span id="elfWin">0</span>勝 / <span id="elfLose">0</span>敗<br>
                         <span id="elfWinrate">--</span>%
@@ -425,9 +475,16 @@
                 </div>
                 
                 <div class="class-item" id="class-royal">
-                    <span class="class-title">ロイヤル</span>
-                    <button class="win-button" onclick="updateCounter('royal', 'win')">勝ち</button>
-                    <button class="lose-button" onclick="updateCounter('royal', 'lose')">負け</button>
+                    <div class="class-title-container">
+                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-royal.svg" alt="ロイヤル" class="class-icon">
+                        <span class="class-title">ロイヤル</span>
+                    </div>
+                    <div class="count-buttons">
+                        <button class="count-button win-button" onclick="updateCounter('royal', 'win', 1)">勝ち +</button>
+                        <button class="count-button lose-button" onclick="updateCounter('royal', 'lose', 1)">負け +</button>
+                        <button class="count-button win-minus-button" onclick="updateCounter('royal', 'win', -1)">勝ち -</button>
+                        <button class="count-button lose-minus-button" onclick="updateCounter('royal', 'lose', -1)">負け -</button>
+                    </div>
                     <div class="counter-display">
                         <span id="royalWin">0</span>勝 / <span id="royalLose">0</span>敗<br>
                         <span id="royalWinrate">--</span>%
@@ -435,9 +492,16 @@
                 </div>
                 
                 <div class="class-item" id="class-witch">
-                    <span class="class-title">ウィッチ</span>
-                    <button class="win-button" onclick="updateCounter('witch', 'win')">勝ち</button>
-                    <button class="lose-button" onclick="updateCounter('witch', 'lose')">負け</button>
+                    <div class="class-title-container">
+                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-witch.svg" alt="ウィッチ" class="class-icon">
+                        <span class="class-title">ウィッチ</span>
+                    </div>
+                    <div class="count-buttons">
+                        <button class="count-button win-button" onclick="updateCounter('witch', 'win', 1)">勝ち +</button>
+                        <button class="count-button lose-button" onclick="updateCounter('witch', 'lose', 1)">負け +</button>
+                        <button class="count-button win-minus-button" onclick="updateCounter('witch', 'win', -1)">勝ち -</button>
+                        <button class="count-button lose-minus-button" onclick="updateCounter('witch', 'lose', -1)">負け -</button>
+                    </div>
                     <div class="counter-display">
                         <span id="witchWin">0</span>勝 / <span id="witchLose">0</span>敗<br>
                         <span id="witchWinrate">--</span>%
@@ -445,9 +509,16 @@
                 </div>
                 
                 <div class="class-item" id="class-dragon">
-                    <span class="class-title">ドラゴン</span>
-                    <button class="win-button" onclick="updateCounter('dragon', 'win')">勝ち</button>
-                    <button class="lose-button" onclick="updateCounter('dragon', 'lose')">負け</button>
+                    <div class="class-title-container">
+                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-dragon.svg" alt="ドラゴン" class="class-icon">
+                        <span class="class-title">ドラゴン</span>
+                    </div>
+                    <div class="count-buttons">
+                        <button class="count-button win-button" onclick="updateCounter('dragon', 'win', 1)">勝ち +</button>
+                        <button class="count-button lose-button" onclick="updateCounter('dragon', 'lose', 1)">負け +</button>
+                        <button class="count-button win-minus-button" onclick="updateCounter('dragon', 'win', -1)">勝ち -</button>
+                        <button class="count-button lose-minus-button" onclick="updateCounter('dragon', 'lose', -1)">負け -</button>
+                    </div>
                     <div class="counter-display">
                         <span id="dragonWin">0</span>勝 / <span id="dragonLose">0</span>敗<br>
                         <span id="dragonWinrate">--</span>%
@@ -455,9 +526,16 @@
                 </div>
                 
                 <div class="class-item" id="class-nightmare">
-                    <span class="class-title">ナイトメア</span>
-                    <button class="win-button" onclick="updateCounter('nightmare', 'win')">勝ち</button>
-                    <button class="lose-button" onclick="updateCounter('nightmare', 'lose')">負け</button>
+                    <div class="class-title-container">
+                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-nightmare.svg" alt="ナイトメア" class="class-icon">
+                        <span class="class-title">ナイトメア</span>
+                    </div>
+                    <div class="count-buttons">
+                        <button class="count-button win-button" onclick="updateCounter('nightmare', 'win', 1)">勝ち +</button>
+                        <button class="count-button lose-button" onclick="updateCounter('nightmare', 'lose', 1)">負け +</button>
+                        <button class="count-button win-minus-button" onclick="updateCounter('nightmare', 'win', -1)">勝ち -</button>
+                        <button class="count-button lose-minus-button" onclick="updateCounter('nightmare', 'lose', -1)">負け -</button>
+                    </div>
                     <div class="counter-display">
                         <span id="nightmareWin">0</span>勝 / <span id="nightmareLose">0</span>敗<br>
                         <span id="nightmareWinrate">--</span>%
@@ -465,9 +543,16 @@
                 </div>
                 
                 <div class="class-item" id="class-bishop">
-                    <span class="class-title">ビショップ</span>
-                    <button class="win-button" onclick="updateCounter('bishop', 'win')">勝ち</button>
-                    <button class="lose-button" onclick="updateCounter('bishop', 'lose')">負け</button>
+                    <div class="class-title-container">
+                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-bishop.svg" alt="ビショップ" class="class-icon">
+                        <span class="class-title">ビショップ</span>
+                    </div>
+                    <div class="count-buttons">
+                        <button class="count-button win-button" onclick="updateCounter('bishop', 'win', 1)">勝ち +</button>
+                        <button class="count-button lose-button" onclick="updateCounter('bishop', 'lose', 1)">負け +</button>
+                        <button class="count-button win-minus-button" onclick="updateCounter('bishop', 'win', -1)">勝ち -</button>
+                        <button class="count-button lose-minus-button" onclick="updateCounter('bishop', 'lose', -1)">負け -</button>
+                    </div>
                     <div class="counter-display">
                         <span id="bishopWin">0</span>勝 / <span id="bishopLose">0</span>敗<br>
                         <span id="bishopWinrate">--</span>%
@@ -475,9 +560,16 @@
                 </div>
                 
                 <div class="class-item" id="class-nemesis">
-                    <span class="class-title">ネメシス</span>
-                    <button class="win-button" onclick="updateCounter('nemesis', 'win')">勝ち</button>
-                    <button class="lose-button" onclick="updateCounter('nemesis', 'lose')">負け</button>
+                    <div class="class-title-container">
+                        <img src="https://shadowverse-evolve.com/wordpress/wp-content/images/class-icon-nemesis.svg" alt="ネメシス" class="class-icon">
+                        <span class="class-title">ネメシス</span>
+                    </div>
+                    <div class="count-buttons">
+                        <button class="count-button win-button" onclick="updateCounter('nemesis', 'win', 1)">勝ち +</button>
+                        <button class="count-button lose-button" onclick="updateCounter('nemesis', 'lose', 1)">負け +</button>
+                        <button class="count-button win-minus-button" onclick="updateCounter('nemesis', 'win', -1)">勝ち -</button>
+                        <button class="count-button lose-minus-button" onclick="updateCounter('nemesis', 'lose', -1)">負け -</button>
+                    </div>
                     <div class="counter-display">
                         <span id="nemesisWin">0</span>勝 / <span id="nemesisLose">0</span>敗<br>
                         <span id="nemesisWinrate">--</span>%
@@ -491,6 +583,10 @@
                     <span id="totalWin">0</span> 勝 / <span id="totalLose">0</span> 敗<br>
                     勝率: <span id="totalWinrate">--</span>%
                 </p>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="winrateChart"></canvas>
             </div>
             
             <div class="reset-button-container">
@@ -525,6 +621,7 @@
         let currentCountersData = {}; // 現在選択中のカウンターのデータを格納
         let currentCounterId = null;
         let user;
+        let winrateChart; // Chart.js のインスタンスを格納する変数
 
         // Googleでログインする関数
         function signInWithGoogle() {
@@ -698,25 +795,36 @@
         function renderCounters() {
             let totalWin = 0;
             let totalLose = 0;
+            const classNames = [];
+            const winData = [];
+            const loseData = [];
+
+            const classMap = {
+                elf: 'エルフ',
+                royal: 'ロイヤル',
+                witch: 'ウィッチ',
+                dragon: 'ドラゴン',
+                nightmare: 'ナイトメア',
+                bishop: 'ビショップ',
+                nemesis: 'ネメシス'
+            };
             
             for (const className in currentCountersData) {
-                const winElement = document.getElementById(`${className}Win`);
-                const loseElement = document.getElementById(`${className}Lose`);
-                const winrateElement = document.getElementById(`${className}Winrate`);
+                const wins = currentCountersData[className].win;
+                const loses = currentCountersData[className].lose;
+                const totalMatches = wins + loses;
+                const winrate = totalMatches > 0 ? (wins / totalMatches * 100).toFixed(1) : '--';
                 
-                if (winElement && loseElement && winrateElement) {
-                    const wins = currentCountersData[className].win;
-                    const loses = currentCountersData[className].lose;
-                    const totalMatches = wins + loses;
-                    const winrate = totalMatches > 0 ? (wins / totalMatches * 100).toFixed(1) : '--';
-                    
-                    winElement.textContent = wins;
-                    loseElement.textContent = loses;
-                    winrateElement.textContent = winrate;
-                    
-                    totalWin += wins;
-                    totalLose += loses;
-                }
+                document.getElementById(`${className}Win`).textContent = wins;
+                document.getElementById(`${className}Lose`).textContent = loses;
+                document.getElementById(`${className}Winrate`).textContent = winrate;
+                
+                totalWin += wins;
+                totalLose += loses;
+                
+                classNames.push(classMap[className]);
+                winData.push(wins);
+                loseData.push(loses);
             }
 
             const totalMatches = totalWin + totalLose;
@@ -725,13 +833,113 @@
             document.getElementById('totalWin').textContent = totalWin;
             document.getElementById('totalLose').textContent = totalLose;
             document.getElementById('totalWinrate').textContent = totalWinrate;
+            
+            updateChart(classNames, winData, loseData);
         }
 
+        // Chart.js を更新または初期化する関数
+        function updateChart(labels, winData, loseData) {
+            const ctx = document.getElementById('winrateChart').getContext('2d');
+            
+            const data = {
+                labels: labels,
+                datasets: [
+                    {
+                        label: '勝利数',
+                        data: winData,
+                        backgroundColor: 'rgba(76, 175, 80, 0.6)',
+                        borderColor: 'rgba(76, 175, 80, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: '敗北数',
+                        data: loseData,
+                        backgroundColor: 'rgba(244, 67, 54, 0.6)',
+                        borderColor: 'rgba(244, 67, 54, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            };
+            
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: {
+                            color: '#444'
+                        },
+                        ticks: {
+                            color: '#e0e0e0'
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        grid: {
+                            color: '#444'
+                        },
+                        ticks: {
+                            color: '#e0e0e0',
+                            stepSize: 1,
+                            callback: function(value) {
+                                if (value % 1 === 0) return value;
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#e0e0e0'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(44, 44, 44, 0.9)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#e0e0e0',
+                        borderColor: '#666',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.raw;
+                                return label;
+                            }
+                        }
+                    }
+                }
+            };
+            
+            if (winrateChart) {
+                winrateChart.data = data;
+                winrateChart.options = options;
+                winrateChart.update();
+            } else {
+                winrateChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: options
+                });
+            }
+        }
+
+
         // カウンターを更新する関数
-        function updateCounter(className, type) {
+        function updateCounter(className, type, amount) {
             if (!currentCounterId) return; // カウンターが選択されていなければ何もしない
             
-            currentCountersData[className][type]++;
+            currentCountersData[className][type] += amount;
+            
+            // カウンターがマイナスにならないようにする
+            if (currentCountersData[className][type] < 0) {
+                currentCountersData[className][type] = 0;
+            }
+            
             const counterRef = database.ref('users/' + user.uid + '/counters/' + currentCounterId + '/data');
             counterRef.set(currentCountersData);
         }
