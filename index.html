@@ -361,7 +361,7 @@
         .chart-container {
             width: 100%;
             max-width: 800px;
-            margin-top: 20px;
+            margin: 20px auto; /* 修正: 中央揃えのためmarginを調整 */
             padding: 20px;
             background-color: #2c2c2c;
             border-radius: 12px;
@@ -823,14 +823,14 @@
                     {
                         label: '勝利数',
                         data: winData,
-                        backgroundColor: 'rgba(76, 175, 80, 0.6)',
+                        backgroundColor: 'rgba(76, 175, 80, 0.8)',
                         borderColor: 'rgba(76, 175, 80, 1)',
                         borderWidth: 1
                     },
                     {
                         label: '敗北数',
                         data: loseData,
-                        backgroundColor: 'rgba(244, 67, 54, 0.6)',
+                        backgroundColor: 'rgba(244, 67, 54, 0.8)',
                         borderColor: 'rgba(244, 67, 54, 1)',
                         borderWidth: 1
                     }
@@ -842,7 +842,7 @@
                 maintainAspectRatio: false,
                 scales: {
                     x: {
-                        stacked: true,
+                        stacked: false, // 修正: スタックを解除して横並びに
                         grid: {
                             color: '#444'
                         },
@@ -851,7 +851,7 @@
                         }
                     },
                     y: {
-                        stacked: true,
+                        stacked: false, // 修正: スタックを解除して横並びに
                         beginAtZero: true,
                         grid: {
                             color: '#444'
@@ -903,7 +903,6 @@
                 });
             }
         }
-
 
         // カウンターを更新する関数
         function updateCounter(className, type, amount) {
