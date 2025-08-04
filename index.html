@@ -358,13 +358,56 @@
             margin: 5px 0;
         }
         
-        .chart-container {
+        .chart-grid {
+            display: flex; /* Flexboxに変更 */
+            flex-direction: column;
+            align-items: center; /* 子要素を中央揃え */
+            gap: 20px;
             width: 100%;
             max-width: 800px;
-            margin: 20px auto; /* 修正: 中央揃えのためmarginを調整 */
+            margin: 20px auto;
+        }
+
+        .chart-container {
             padding: 20px;
             background-color: #2c2c2c;
             border-radius: 12px;
+            width: 100%; /* 子要素の幅を100%に設定 */
+        }
+        
+        .balance-chart-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .balance-chart-controls button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        
+        .balance-chart-controls button:hover {
+            background-color: #45a049;
+        }
+        
+        .balance-chart-controls button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        
+        #currentHistoryRange {
+            font-size: 1.2rem;
+            font-weight: bold;
         }
 
         #totalWin {
@@ -559,8 +602,18 @@
                 </p>
             </div>
             
-            <div class="chart-container">
-                <canvas id="winrateChart"></canvas>
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <canvas id="winloseChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="balance-chart-controls">
+                        <button onclick="changeBalanceChartPage(-1)">&lt;</button>
+                        <span id="currentHistoryRange">--</span>
+                        <button onclick="changeBalanceChartPage(1)">&gt;</button>
+                    </div>
+                    <canvas id="balanceChart"></canvas>
+                </div>
             </div>
             
             <div class="reset-button-container">
@@ -591,11 +644,17 @@
         const auth = firebase.auth();
         const database = firebase.database();
         
-        let counters = {}; // すべてのカウンターを格納
-        let currentCountersData = {}; // 現在選択中のカウンターのデータを格納
+        let counters = {};
+        let currentCountersData = {};
         let currentCounterId = null;
         let user;
-        let winrateChart; // Chart.js のインスタンスを格納する変数
+        let winloseChart; // 棒グラフのインスタンス
+        let balanceChart; // 折れ線グラフのインスタンス
+        const MAX_HISTORY = 50; // 履歴を保存する最大数
+
+        // 折れ線グラフの表示範囲設定
+        const PAGE_SIZES = [10, 20, 30, 50];
+        let balanceChartPage = 0; // 0が最新のページ, 1が古いページ...
 
         // Googleでログインする関数
         function signInWithGoogle() {
@@ -623,23 +682,19 @@
                 document.getElementById('loginUI').style.display = 'none';
                 document.getElementById('userInfo').textContent = `ログイン中: ${user.displayName}`;
 
-                // データベースからの全カウンターのデータ読み込み
                 const userRef = database.ref('users/' + user.uid + '/counters');
                 userRef.on('value', (snapshot) => {
                     counters = snapshot.val() || {};
                     
                     if (currentCounterId && counters[currentCounterId]) {
-                        // 詳細画面が表示中の場合は、データだけ更新して再描画
                         currentCountersData = counters[currentCounterId].data;
                         renderCounters();
                     } else if (Object.keys(counters).length === 0) {
-                        // カウンターが一つもない場合
                         currentCounterId = null;
                         document.getElementById('noCounterScreen').style.display = 'block';
                         document.getElementById('counterListScreen').style.display = 'none';
                         document.getElementById('counterDetailScreen').style.display = 'none';
                     } else {
-                        // カウンターが一つ以上ある場合
                         currentCounterId = null;
                         document.getElementById('noCounterScreen').style.display = 'none';
                         document.getElementById('counterListScreen').style.display = 'block';
@@ -661,7 +716,7 @@
         // カウンター一覧を画面に表示する関数
         function renderCounterList() {
             const listElement = document.getElementById('counter-list');
-            listElement.innerHTML = ''; // リストをクリア
+            listElement.innerHTML = '';
             
             for (const id in counters) {
                 const counter = counters[id];
@@ -711,11 +766,11 @@
                         nightmare: { win: 0, lose: 0 },
                         bishop: { win: 0, lose: 0 },
                         nemesis: { win: 0, lose: 0 }
-                    }
+                    },
+                    matchHistory: [] // 新しく勝敗履歴を保存する配列を追加
                 };
                 newCounterRef.set(newCounterData)
                     .then(() => {
-                        // 新規作成後、作成したカウンターの詳細画面に移動
                         selectCounter(newCounterRef.key);
                     });
             }
@@ -723,7 +778,7 @@
         
         // カウンター名を編集する関数
         function editCounterName(id, event) {
-            event.stopPropagation(); // 親要素のクリックイベントが発火しないようにする
+            event.stopPropagation();
             const currentName = counters[id].name;
             const newName = prompt(`「${currentName}」の新しい名前を入力してください。`, currentName);
             
@@ -733,10 +788,9 @@
             }
         }
 
-
         // カウンターを削除する関数
         function deleteCounter(id, event) {
-            event.stopPropagation(); // 親要素のクリックイベントが発火しないようにする
+            event.stopPropagation();
             if (confirm(`本当に「${counters[id].name}」を削除しますか？`)) {
                 const counterRef = database.ref('users/' + user.uid + '/counters/' + id);
                 counterRef.remove();
@@ -747,6 +801,7 @@
         function selectCounter(id) {
             currentCounterId = id;
             currentCountersData = counters[id].data;
+            balanceChartPage = 0; // ページをリセット
             
             document.getElementById('currentDeckName').textContent = counters[id].name;
             document.getElementById('noCounterScreen').style.display = 'none';
@@ -774,15 +829,10 @@
             const classNames = [];
             const winData = [];
             const loseData = [];
-
+            
             const classMap = {
-                elf: 'エルフ',
-                royal: 'ロイヤル',
-                witch: 'ウィッチ',
-                dragon: 'ドラゴン',
-                nightmare: 'ナイトメア',
-                bishop: 'ビショップ',
-                nemesis: 'ネメシス'
+                elf: 'エルフ', royal: 'ロイヤル', witch: 'ウィッチ',
+                dragon: 'ドラゴン', nightmare: 'ナイトメア', bishop: 'ビショップ', nemesis: 'ネメシス'
             };
             
             for (const className in currentCountersData) {
@@ -810,12 +860,32 @@
             document.getElementById('totalLose').textContent = totalLose;
             document.getElementById('totalWinrate').textContent = totalWinrate;
             
-            updateChart(classNames, winData, loseData);
+            updateWinLoseChart(classNames, winData, loseData);
+            updateBalanceChart(counters[currentCounterId].matchHistory || []);
+        }
+        
+        // 折れ線グラフの表示範囲を切り替える関数
+        function changeBalanceChartPage(direction) {
+            const totalMatches = (counters[currentCounterId].matchHistory || []).length;
+            const maxPage = Math.floor(totalMatches / PAGE_SIZES[PAGE_SIZES.length - 1]);
+            
+            // `direction`に応じてページを更新
+            let newPage = balanceChartPage + direction;
+
+            if (newPage < 0) {
+                newPage = 0;
+            } else if (newPage > maxPage) {
+                newPage = maxPage;
+            }
+            balanceChartPage = newPage;
+            
+            // グラフを再描画
+            updateBalanceChart(counters[currentCounterId].matchHistory || []);
         }
 
-        // Chart.js を更新または初期化する関数
-        function updateChart(labels, winData, loseData) {
-            const ctx = document.getElementById('winrateChart').getContext('2d');
+        // 棒グラフを更新または初期化する関数
+        function updateWinLoseChart(labels, winData, loseData) {
+            const ctx = document.getElementById('winloseChart').getContext('2d');
             
             const data = {
                 labels: labels,
@@ -842,35 +912,23 @@
                 maintainAspectRatio: false,
                 scales: {
                     x: {
-                        stacked: false, // 修正: スタックを解除して横並びに
-                        grid: {
-                            color: '#444'
-                        },
-                        ticks: {
-                            color: '#e0e0e0'
-                        }
+                        stacked: false,
+                        grid: { color: '#444' },
+                        ticks: { color: '#e0e0e0' }
                     },
                     y: {
-                        stacked: false, // 修正: スタックを解除して横並びに
+                        stacked: false,
                         beginAtZero: true,
-                        grid: {
-                            color: '#444'
-                        },
+                        grid: { color: '#444' },
                         ticks: {
                             color: '#e0e0e0',
                             stepSize: 1,
-                            callback: function(value) {
-                                if (value % 1 === 0) return value;
-                            }
+                            callback: function(value) { if (value % 1 === 0) return value; }
                         }
                     }
                 },
                 plugins: {
-                    legend: {
-                        labels: {
-                            color: '#e0e0e0'
-                        }
-                    },
+                    legend: { labels: { color: '#e0e0e0' } },
                     tooltip: {
                         backgroundColor: 'rgba(44, 44, 44, 0.9)',
                         titleColor: '#ffffff',
@@ -880,9 +938,7 @@
                         callbacks: {
                             label: function(context) {
                                 let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
+                                if (label) { label += ': '; }
                                 label += context.raw;
                                 return label;
                             }
@@ -891,12 +947,12 @@
                 }
             };
             
-            if (winrateChart) {
-                winrateChart.data = data;
-                winrateChart.options = options;
-                winrateChart.update();
+            if (winloseChart) {
+                winloseChart.data = data;
+                winloseChart.options = options;
+                winloseChart.update();
             } else {
-                winrateChart = new Chart(ctx, {
+                winloseChart = new Chart(ctx, {
                     type: 'bar',
                     data: data,
                     options: options
@@ -904,27 +960,194 @@
             }
         }
 
+        // 折れ線グラフを更新または初期化する関数
+        function updateBalanceChart(matchHistory) {
+            const ctx = document.getElementById('balanceChart').getContext('2d');
+            
+            const pageSize = PAGE_SIZES[balanceChartPage % PAGE_SIZES.length];
+            const startIndex = Math.max(0, matchHistory.length - pageSize - (balanceChartPage * pageSize));
+            const endIndex = matchHistory.length - (balanceChartPage * pageSize);
+            const historyToDisplay = matchHistory.slice(startIndex, endIndex);
+
+            let currentBalance = 0;
+            const balanceData = [0];
+            
+            // 表示範囲の開始時点の勝敗数を計算
+            const startHistory = matchHistory.slice(0, startIndex);
+            startHistory.forEach(result => {
+                if (result === 'win') {
+                    currentBalance++;
+                } else if (result === 'lose') {
+                    currentBalance--;
+                }
+            });
+
+            historyToDisplay.forEach(result => {
+                if (result === 'win') {
+                    currentBalance++;
+                } else if (result === 'lose') {
+                    currentBalance--;
+                }
+                balanceData.push(currentBalance);
+            });
+            
+            const labels = Array.from({length: historyToDisplay.length + 1}, (_, i) => startIndex + i);
+            
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: '勝ち負けの推移',
+                    data: balanceData,
+                    borderColor: '#2196F3',
+                    backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.1,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                }]
+            };
+
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '試合数',
+                            color: '#e0e0e0'
+                        },
+                        grid: { color: '#444' },
+                        ticks: { color: '#e0e0e0' }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '勝ち数 - 負け数',
+                            color: '#e0e0e0'
+                        },
+                        grid: { color: '#444' },
+                        ticks: { color: '#e0e0e0' },
+                        suggestedMin: -10,
+                        suggestedMax: 10,
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#e0e0e0' } },
+                    tooltip: {
+                        backgroundColor: 'rgba(44, 44, 44, 0.9)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#e0e0e0',
+                        borderColor: '#666',
+                        borderWidth: 1
+                    }
+                }
+            };
+            
+            // 0地点にラインを引くプラグイン
+            const zeroLinePlugin = {
+                id: 'zeroLine',
+                beforeDraw: (chart) => {
+                    const ctx = chart.canvas.getContext('2d');
+                    const yAxis = chart.scales.y;
+                    const zeroY = yAxis.getPixelForValue(0);
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#e57373';
+                    ctx.moveTo(yAxis.left, zeroY);
+                    ctx.lineTo(yAxis.right, zeroY);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            };
+            
+            // ページ表示を更新
+            const totalMatches = matchHistory.length;
+            const startLabel = startIndex + 1;
+            const endLabel = endIndex;
+            document.getElementById('currentHistoryRange').textContent = `試合数: ${startLabel} - ${endLabel} (${pageSize}戦表示)`;
+
+            // ボタンの有効/無効を切り替える
+            document.querySelector('.balance-chart-controls button:first-child').disabled = (startIndex === 0);
+            document.querySelector('.balance-chart-controls button:last-child').disabled = (endIndex === totalMatches);
+            
+            if (balanceChart) {
+                balanceChart.data = data;
+                balanceChart.options = options;
+                balanceChart.plugins = [zeroLinePlugin];
+                balanceChart.update();
+            } else {
+                balanceChart = new Chart(ctx, {
+                    type: 'line',
+                    data: data,
+                    options: options,
+                    plugins: [zeroLinePlugin]
+                });
+            }
+        }
+
         // カウンターを更新する関数
         function updateCounter(className, type, amount) {
-            if (!currentCounterId) return; // カウンターが選択されていなければ何もしない
+            if (!currentCounterId) return;
             
-            currentCountersData[className][type] += amount;
+            const currentCounterRef = database.ref('users/' + user.uid + '/counters/' + currentCounterId);
+            const currentCounter = counters[currentCounterId];
             
-            // カウンターがマイナスにならないようにする
-            if (currentCountersData[className][type] < 0) {
-                currentCountersData[className][type] = 0;
+            // win/lose カウントを更新
+            if (currentCounter.data[className][type] + amount >= 0) {
+                currentCounter.data[className][type] += amount;
+            } else {
+                return; // マイナスにはしない
+            }
+
+            // 勝敗履歴を更新
+            if (amount === 1) {
+                currentCounter.matchHistory = currentCounter.matchHistory || [];
+                if (type === 'win') {
+                    currentCounter.matchHistory.push('win');
+                } else if (type === 'lose') {
+                    currentCounter.matchHistory.push('lose');
+                }
+                // 最新50戦に制限
+                if (currentCounter.matchHistory.length > MAX_HISTORY) {
+                    currentCounter.matchHistory.shift();
+                }
+            } else if (amount === -1) {
+                 // 減らす操作の場合、最新の履歴を削除
+                if (currentCounter.matchHistory && currentCounter.matchHistory.length > 0) {
+                    const lastResult = currentCounter.matchHistory.pop();
+                    if (type === 'win' && lastResult !== 'win') {
+                        // 整合性がとれない場合は元に戻す
+                        currentCounter.data[className][type] -= amount;
+                        currentCounter.matchHistory.push(lastResult);
+                        alert("直前の試合と異なる結果は取り消せません。");
+                        return;
+                    }
+                    if (type === 'lose' && lastResult !== 'lose') {
+                        // 整合性がとれない場合は元に戻す
+                        currentCounter.data[className][type] -= amount;
+                        currentCounter.matchHistory.push(lastResult);
+                        alert("直前の試合と異なる結果は取り消せません。");
+                        return;
+                    }
+                }
             }
             
-            const counterRef = database.ref('users/' + user.uid + '/counters/' + currentCounterId + '/data');
-            counterRef.set(currentCountersData);
+            currentCounterRef.set(currentCounter);
         }
 
         // 全てをリセットする関数
         function resetAll() {
-            if (!currentCounterId) return; // カウンターが選択されていなければ何もしない
+            if (!currentCounterId) return;
             
             if (confirm('本当に全てのデータをリセットしますか？')) {
-                currentCountersData = {
+                const currentCounterRef = database.ref('users/' + user.uid + '/counters/' + currentCounterId);
+                const currentCounter = counters[currentCounterId];
+                
+                currentCounter.data = {
                     elf: { win: 0, lose: 0 },
                     royal: { win: 0, lose: 0 },
                     witch: { win: 0, lose: 0 },
@@ -933,8 +1156,9 @@
                     bishop: { win: 0, lose: 0 },
                     nemesis: { win: 0, lose: 0 }
                 };
-                const counterRef = database.ref('users/' + user.uid + '/counters/' + currentCounterId + '/data');
-                counterRef.set(currentCountersData);
+                currentCounter.matchHistory = []; // 履歴もリセット
+                
+                currentCounterRef.set(currentCounter);
             }
         }
     </script>
