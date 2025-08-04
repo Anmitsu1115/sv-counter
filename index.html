@@ -442,7 +442,7 @@
 
         .reset-button-container {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 20px; /* ★修正: 上部に余白を追加 */
         }
 
         #resetButton {
@@ -885,6 +885,7 @@
             currentCounterId = null;
             currentCounterData = null;
             
+            // 画面を切り替える
             if (Object.keys(counters).length === 0) {
                 showNoCounterScreen();
             } else {
@@ -985,7 +986,7 @@
             
             const options = {
                 responsive: true,
-                maintainAspectRatio: true, /* ★変更: アスペクト比を維持するように設定 */
+                maintainAspectRatio: true, /* ★修正: アスペクト比を維持するように設定 */
                 scales: {
                     x: {
                         stacked: false,
@@ -1133,8 +1134,8 @@
                     ctx.beginPath();
                     ctx.lineWidth = 2;
                     ctx.strokeStyle = '#e57373';
-                    ctx.moveTo(chart.chartArea.left, zeroY); /* ★変更: 描画範囲の左端から */
-                    ctx.lineTo(chart.chartArea.right, zeroY); /* ★変更: 描画範囲の右端まで */
+                    ctx.moveTo(chart.chartArea.left, zeroY);
+                    ctx.lineTo(chart.chartArea.right, zeroY);
                     ctx.stroke();
                     ctx.restore();
                 }
