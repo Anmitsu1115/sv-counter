@@ -1103,9 +1103,8 @@
                         },
                         grid: { color: '#444' },
                         ticks: { color: '#e0e0e0' },
-                        // Y軸の表示範囲を-20から20に固定
-                        suggestedMin: -20,
-                        suggestedMax: 20,
+                        min: -20, // 最小値を-20に固定
+                        max: 20, // 最大値を20に固定
                     }
                 },
                 plugins: {
@@ -1195,6 +1194,10 @@
             // 勝敗履歴を更新
             if (amount === 1) {
                 matchHistory.push(type);
+                // 最新50件に制限
+                if (matchHistory.length > MAX_HISTORY) {
+                    matchHistory.shift();
+                }
             } else if (amount === -1) {
                 // 減らす操作の場合、最新の履歴を削除
                 if (matchHistory.length > 0) {
@@ -1209,11 +1212,6 @@
                 }
             }
             
-            // データベースに書き込む前に、履歴を最新50件に強制的に制限する
-            if (matchHistory.length > MAX_HISTORY) {
-                matchHistory = matchHistory.slice(matchHistory.length - MAX_HISTORY);
-            }
-
             // データベースの特定の部分だけを更新
             currentCounterRef.child('data/' + className).update({ win: wins, lose: loses });
             currentCounterRef.child('matchHistory').set(matchHistory);
