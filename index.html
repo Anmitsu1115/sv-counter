@@ -368,13 +368,31 @@
             margin: 20px auto;
         }
 
+        /* Chart.js のグラフコンテナの高さと幅を修正 */
         .chart-container {
             padding: 20px;
             background-color: #2c2c2c;
             border-radius: 12px;
             width: 100%;
-            /* 修正: heightを削除して、max-heightのみを残す */
-            max-height: 400px;
+            max-width: 600px;
+            height: 400px; /* ★ここを修正しました */
+        }
+        
+        #winloseChart {
+            max-width: 100%;
+            height: 100%;
+        }
+        
+        #balanceChart {
+            max-width: 100%;
+            height: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .chart-container {
+                width: 100%;
+                height: 300px; /* ★モバイル向けにも修正 */
+            }
         }
         
         .balance-chart-controls {
@@ -485,7 +503,7 @@
 
         <div id="loginUI" class="login-container">
             <button class="login-button" onclick="signInWithGoogle()">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                <img src="https://www.gstatic.com/firebasejs/8.10.1/images/auth/google.svg" alt="Google">
                 Googleでログイン
             </button>
         </div>
@@ -881,6 +899,7 @@
         function backToCounterList() {
             // 既存のリスナーがあれば停止
             if (currentCounterListener) {
+                // 正しい参照をオフにする
                 const counterRef = database.ref('users/' + user.uid + '/counters/' + currentCounterId);
                 counterRef.off('value', currentCounterListener);
                 currentCounterListener = null;
@@ -989,7 +1008,7 @@
             
             const options = {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 scales: {
                     x: {
                         stacked: false,
@@ -1101,7 +1120,8 @@
                         grid: { color: '#444' },
                         ticks: {
                             color: '#e0e0e0',
-                            autoSkip: true, /* ★修正: ラベルが重ならないように自動で間引く */
+                            autoSkip: false,
+                            stepSize: 2,
                             maxRotation: 0,
                             minRotation: 0
                         }
@@ -1114,8 +1134,8 @@
                         },
                         grid: { color: '#444' },
                         ticks: { color: '#e0e0e0' },
-                        min: -20, // 最小値を-20に固定
-                        max: 20, // 最大値を20に固定
+                        min: -20,
+                        max: 20,
                     }
                 },
                 plugins: {
