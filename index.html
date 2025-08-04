@@ -373,16 +373,8 @@
             background-color: #2c2c2c;
             border-radius: 12px;
             width: 100%;
-            /* 修正: 棒グラフのサイズを固定 */
-            width: 600px;
-            height: 400px;
-        }
-
-        @media (max-width: 600px) {
-            .chart-container {
-                width: 100%;
-                height: auto;
-            }
+            /* 修正: heightを削除して、max-heightのみを残す */
+            max-height: 400px;
         }
         
         .balance-chart-controls {
@@ -493,7 +485,7 @@
 
         <div id="loginUI" class="login-container">
             <button class="login-button" onclick="signInWithGoogle()">
-                <img src="https://www.gstatic.com/firebasejs/8.10.1/images/auth/google.svg" alt="Google">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
                 Googleでログイン
             </button>
         </div>
@@ -633,10 +625,10 @@
             </div>
             
             <div class="chart-grid">
-                <div class="chart-container" style="width: 600px; height: 400px;">
+                <div class="chart-container">
                     <canvas id="winloseChart"></canvas>
                 </div>
-                <div class="chart-container" style="width: 600px; height: 400px;">
+                <div class="chart-container">
                     <div class="balance-chart-controls">
                         <button onclick="changeBalanceChartRange(-1)">&lt;</button>
                         <div class="range-buttons">
@@ -889,7 +881,6 @@
         function backToCounterList() {
             // 既存のリスナーがあれば停止
             if (currentCounterListener) {
-                // 正しい参照をオフにする
                 const counterRef = database.ref('users/' + user.uid + '/counters/' + currentCounterId);
                 counterRef.off('value', currentCounterListener);
                 currentCounterListener = null;
@@ -998,7 +989,7 @@
             
             const options = {
                 responsive: true,
-                maintainAspectRatio: false, /* 修正: アスペクト比を維持しない */
+                maintainAspectRatio: true,
                 scales: {
                     x: {
                         stacked: false,
@@ -1110,8 +1101,7 @@
                         grid: { color: '#444' },
                         ticks: {
                             color: '#e0e0e0',
-                            autoSkip: false, /* 修正: autoSkipを無効に */
-                            stepSize: 2, /* 修正: ラベルを2刻みに設定 */
+                            autoSkip: true, /* ★修正: ラベルが重ならないように自動で間引く */
                             maxRotation: 0,
                             minRotation: 0
                         }
