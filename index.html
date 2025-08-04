@@ -373,14 +373,9 @@
             background-color: #2c2c2c;
             border-radius: 12px;
             width: 100%;
-            max-width: 600px; /* 修正: 棒グラフの幅を以前の広い状態に戻す */
-            height: auto;
-        }
-        
-        #winloseChart {
-            /* 棒グラフの描画サイズを調整 */
-            max-width: 100%;
-            height: 300px;
+            /* 修正: 棒グラフのサイズを固定 */
+            width: 600px;
+            height: 400px;
         }
 
         @media (max-width: 600px) {
@@ -638,10 +633,10 @@
             </div>
             
             <div class="chart-grid">
-                <div class="chart-container">
+                <div class="chart-container" style="width: 600px; height: 400px;">
                     <canvas id="winloseChart"></canvas>
                 </div>
-                <div class="chart-container">
+                <div class="chart-container" style="width: 600px; height: 400px;">
                     <div class="balance-chart-controls">
                         <button onclick="changeBalanceChartRange(-1)">&lt;</button>
                         <div class="range-buttons">
@@ -1003,7 +998,7 @@
             
             const options = {
                 responsive: true,
-                maintainAspectRatio: true, /* 修正: アスペクト比を維持する */
+                maintainAspectRatio: false, /* 修正: アスペクト比を維持しない */
                 scales: {
                     x: {
                         stacked: false,
@@ -1115,8 +1110,8 @@
                         grid: { color: '#444' },
                         ticks: {
                             color: '#e0e0e0',
-                            autoSkip: false,
-                            stepSize: 2,
+                            autoSkip: false, /* 修正: autoSkipを無効に */
+                            stepSize: 2, /* 修正: ラベルを2刻みに設定 */
                             maxRotation: 0,
                             minRotation: 0
                         }
